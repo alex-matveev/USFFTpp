@@ -9,8 +9,6 @@
 
 #include <fftw3.h>
 
-#include <bits/stdc++.h>
-
 #include "usfftpp.h"
 
 #pragma once
