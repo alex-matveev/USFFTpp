@@ -7,6 +7,15 @@
 
 namespace usfftpp {
 
+namespace detail {
+    struct aligned_deleter {
+        template <typename T>
+        void operator()(T *ptr){
+            _aligned_free(ptr);
+        }
+    };
+}
+
 template <std::size_t D> class simple_par_visitor_policy {
   public:
     template <typename T, typename Functor>
@@ -36,8 +45,8 @@ template <> class simple_par_visitor_policy<2> {
                     std::complex<T> *scaled, std::size_t stateSize) {
 #pragma omp parallel
         {
-            auto local_weight_x = std::unique_ptr<T[]>(new (std::align_val_t(64)) T[stateSize]);
-            auto local_weight_y = std::unique_ptr<T[]>(new (std::align_val_t(64)) T[stateSize]);
+            auto local_weight_x = std::unique_ptr<T[], detail::aligned_deleter>(static_cast<T*>(_aligned_malloc(stateSize * sizeof(T), 64)));
+            auto local_weight_y = std::unique_ptr<T[], detail::aligned_deleter>(static_cast<T*>(_aligned_malloc(stateSize * sizeof(T), 64)));
 
 #pragma omp for schedule(dynamic, 64)
             for (int i = 0; i < x.size(); i++) {
@@ -101,8 +110,8 @@ template <> class simple_par_block_visitor_policy<2> {
 
 #pragma omp parallel
         {
-            auto local_weight_x = std::unique_ptr<T[]>(new (std::align_val_t(64)) T[stateSize]);
-            auto local_weight_y = std::unique_ptr<T[]>(new (std::align_val_t(64)) T[stateSize]);
+            auto local_weight_x = std::unique_ptr<T[], detail::aligned_deleter>(static_cast<T*>(_aligned_malloc(stateSize * sizeof(T), 64)));
+            auto local_weight_y = std::unique_ptr<T[], detail::aligned_deleter>(static_cast<T*>(_aligned_malloc(stateSize * sizeof(T), 64)));
 
             for (std::ptrdiff_t group_i = 0; group_i < step_y; group_i++) {
                 for (std::ptrdiff_t group_j = 0; group_j < 2; group_j++) {
