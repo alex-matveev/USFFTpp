@@ -10,6 +10,7 @@ set_target_properties(USFFTpp PROPERTIES
 	PUBLIC_HEADER "${USFFTPP_PUBLIC_HEADERS}")
 
 target_include_directories (USFFTpp PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_compile_definitions(USFFTpp PRIVATE USFFTPP_EXPORT)
 
 find_package (OpenMP)
 
