@@ -42,7 +42,7 @@ template <> class simple_par_visitor_policy<1> {
 #pragma omp parallel
         {
 #pragma omp for schedule(dynamic, 2048)
-            for (int i = 0; i < x.size(); i++) {
+            for (std::ptrdiff_t i = 0; i < x.size(); i++) {
                 fun(i, f, scaled);
             }
         }
@@ -61,7 +61,7 @@ template <> class simple_par_visitor_policy<2> {
             auto local_weight_y = std::unique_ptr<T[], detail::aligned_deleter>(static_cast<T*>(detail::aligned_alloc(64, stateSize * sizeof(T))));
 
 #pragma omp for schedule(dynamic, 64)
-            for (int i = 0; i < x.size(); i++) {
+            for (std::ptrdiff_t i = 0; i < x.size(); i++) {
                 fun(i, f, scaled, local_weight_x.get(), local_weight_y.get());
             }
         }
@@ -86,7 +86,7 @@ template <> class simple_par_block_visitor_policy<1> {
 
 #pragma omp parallel
         {
-            for (std::size_t p = 0; p < 2; p++) {
+            for (std::ptrdiff_t p = 0; p < 2; p++) {
 #pragma omp for schedule(dynamic, 16)
                 for (std::size_t i = p; i <= 2 * N[0] / block_size; i += 2) {
 
