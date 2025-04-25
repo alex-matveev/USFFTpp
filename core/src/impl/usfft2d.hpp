@@ -11,6 +11,9 @@
 
 #include "usfftpp.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 #pragma once
 
 namespace usfftpp {
@@ -20,7 +23,7 @@ template <typename T, typename FoldPolicy> void plan<T, 2, FoldPolicy>::reorder_
     m_di = std::make_unique<std::pair<std::size_t, std::size_t>[]>(m_points.size());
 
 #pragma omp parallel for
-    for (std::size_t i = 0; i < m_points.size(); i++) {
+    for (std::ptrdiff_t i = 0; i < m_points.size(); i++) {
         std::size_t indx = (m_oversamplingFactor * m_N[1] * std::get<1>(m_points[i])) +
                            m_oversamplingFactor * m_N[1] / 2;
         std::size_t indy = (m_oversamplingFactor * m_N[0] * std::get<0>(m_points[i])) +

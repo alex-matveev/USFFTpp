@@ -6,19 +6,29 @@
 #include <utility>
 #include <vector>
 
+#ifdef USFFTPP_EXPORT
+#    ifdef _WIN32
+#        define USFFTPP_API __declspec(dllexport)
+#    else
+#        define USFFTPP_API __attribute__((visibility("default")))
+#    endif
+#else
+#    define USFFTPP_API
+#endif
+
 #pragma once
 
 namespace usfftpp {
 
 enum class fourier_direction { forward, backward };
 
-template <typename T, std::size_t D, typename FoldPolicy> class plan {
+template <typename T, std::size_t D, typename FoldPolicy> class USFFTPP_API plan {
   public:
     int nonunform_to_uniform_transform(std::complex<T> *F, std::complex<T> *f, int FourierType);
     int uninform_to_nonuniform_transform(std::complex<T> *F, std::complex<T> *f, int FourierType);
 };
 
-template <typename T, typename FoldPolicy> class plan<T, 1, FoldPolicy> {
+template <typename T, typename FoldPolicy> class USFFTPP_API plan<T, 1, FoldPolicy> {
   protected:
     std::array<std::ptrdiff_t, 1> m_N;
     T m_epsilon;
@@ -58,7 +68,7 @@ template <typename T, typename FoldPolicy> class plan<T, 1, FoldPolicy> {
                                          fourier_direction direction);
 };
 
-template <typename T, typename FoldPolicy> class plan<T, 2, FoldPolicy> {
+template <typename T, typename FoldPolicy> class USFFTPP_API plan<T, 2, FoldPolicy> {
   protected:
     std::array<std::ptrdiff_t, 2> m_N;
     T m_epsilon;
