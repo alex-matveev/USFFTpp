@@ -88,7 +88,7 @@ template <> class simple_par_block_visitor_policy<1> {
         {
             for (std::ptrdiff_t p = 0; p < 2; p++) {
 #pragma omp for schedule(dynamic, 16)
-                for (std::size_t i = p; i <= 2 * N[0] / block_size; i += 2) {
+                for (std::ptrdiff_t i = p; i <= 2 * N[0] / block_size; i += 2) {
 
                     std::size_t count_of_points = (2 * N[0] - block_size * i > block_size)
                                                       ? block_size
