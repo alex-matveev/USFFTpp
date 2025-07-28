@@ -99,7 +99,7 @@ TEST_P(USFFT1D_E2U, Calculation_ShouldReturnCorrectResult) {
         vx.push_back(0.0);
     }
 
-    Plan1d p(_N1d, vx, epsilon);
+    Plan1d p(_N1d, vx, fourier_direction::forward, epsilon);
 
     auto *F = new std::complex<float>[_N1d[0]];
 
@@ -122,7 +122,7 @@ TEST_P(USFFT1D_E2U, Calculation_ShouldReturnCorrectResult) {
 
     usdft1d_e2u<long double>(_F, _x, _N1d, points, -1, etalon);
 
-    p.uninform_to_nonuniform_transform(F, f, fourier_direction::forward);
+    p.uninform_to_nonuniform_transform(F, f);
     delete[] _F;
 
     auto _f = new std::complex<long double>[points];
@@ -162,7 +162,7 @@ TEST_P(USFFT1D_U2E, Calculation_ShouldReturnCorrectResult) {
         vx.push_back(0.0);
     }
 
-    Plan1d p(_N1d, vx, epsilon);
+    Plan1d p(_N1d, vx, fourier_direction::forward, epsilon);
 
     auto *F = new std::complex<float>[points];
 
@@ -187,7 +187,7 @@ TEST_P(USFFT1D_U2E, Calculation_ShouldReturnCorrectResult) {
 
     usdft1d_u2e<long double>(_F, _x, _N1d, points, -1, etalon);
 
-    p.nonunform_to_uniform_transform(F, f, fourier_direction::forward);
+    p.nonunform_to_uniform_transform(F, f);
     delete[] _F;
 
     auto _f = new std::complex<long double>[_N1d[0]];
