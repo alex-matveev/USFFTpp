@@ -145,6 +145,7 @@ void plan<T, 2, FoldPolicy>::fft(std::complex<T> *data, fourier_direction direct
             fftwf_execute_dft(m_plan_bwd, 
                               pointer_to_data, 
                               pointer_to_data);
+            break;
         default:
             break;
         }
@@ -161,6 +162,7 @@ void plan<T, 2, FoldPolicy>::fft(std::complex<T> *data, fourier_direction direct
             fftw_execute_dft(m_plan_bwd, 
                              pointer_to_data, 
                              pointer_to_data);
+            break;
         default:
             break;
         }    

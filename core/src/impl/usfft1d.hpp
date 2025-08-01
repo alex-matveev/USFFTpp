@@ -104,24 +104,28 @@ void plan<T, 1, FoldPolicy>::fft(std::complex<T> *data, fourier_direction direct
     fftshift(data + m_radius, m_oversamplingFactor * m_N[0]);
 
     if constexpr (std::is_same<T, float>::value) {
+        auto pointer_to_data = reinterpret_cast<fftwf_complex *>(&data[m_radius]);
         switch (direction)
         {
         case fourier_direction::forward:
-            fftwf_execute_dft(m_plan_fwd, (fftwf_complex *)&data[m_radius], (fftwf_complex *)&data[m_radius]);
+            fftwf_execute_dft(m_plan_fwd, pointer_to_data, pointer_to_data);
             break;
         case fourier_direction::backward:
-            fftwf_execute_dft(m_plan_bwd, (fftwf_complex *)&data[m_radius], (fftwf_complex *)&data[m_radius]);
+            fftwf_execute_dft(m_plan_bwd, pointer_to_data, pointer_to_data);
+            break;
         default:
             break;
         }
     } else {
+        auto pointer_to_data = reinterpret_cast<fftw_complex *>(&data[m_radius]);
         switch (direction)
         {
         case fourier_direction::forward:
-            fftw_execute_dft(m_plan_fwd, (fftw_complex *)&data[m_radius], (fftw_complex *)&data[m_radius]);
+            fftw_execute_dft(m_plan_fwd, pointer_to_data, pointer_to_data);
             break;
         case fourier_direction::backward:
-            fftw_execute_dft(m_plan_bwd, (fftw_complex *)&data[m_radius], (fftw_complex *)&data[m_radius]);
+            fftw_execute_dft(m_plan_bwd, pointer_to_data, pointer_to_data);
+            break;
         default:
             break;
         }    
@@ -217,18 +221,22 @@ plan<T, 1, FoldPolicy>::plan(std::array<std::ptrdiff_t, 1> N, std::vector<T> &po
       m_strides({static_cast<std::size_t>(m_radius), 1}) {
     reorder_points();
 
-    const int padded_size[] = {static_cast<int>(m_oversamplingFactor * m_N[0])};
+    const int oversampled_size[] = {static_cast<int>(m_oversamplingFactor * m_N[0])};
     if constexpr (std::is_same<T, float>::value) {
-        m_plan_fwd = fftwf_plan_dft_1d(padded_size[0], 0,
+        m_plan_fwd = fftwf_plan_dft_1d(oversampled_size[0], 0,
                                          0, FFTW_FORWARD, FFTW_ESTIMATE);
-        m_plan_bwd = fftwf_plan_dft_1d(padded_size[0], 0,
+        m_plan_bwd = fftwf_plan_dft_1d(oversampled_size[0], 0,
                                          0, FFTW_BACKWARD, FFTW_ESTIMATE);
 
     } else {
-        m_plan_fwd = fftw_plan_dft_1d(padded_size[0], 0,
-                                         0, FFTW_FORWARD, FFTW_ESTIMATE);
-        m_plan_bwd = fftw_plan_dft_1d(padded_size[0], 0,
-                                         0, FFTW_BACKWARD, FFTW_ESTIMATE);
+        m_plan_fwd = fftw_plan_dft_1d(oversampled_size[0], 
+                                         nullptr,
+                                         nullptr,
+                                         FFTW_FORWARD, FFTW_ESTIMATE);
+        m_plan_bwd = fftw_plan_dft_1d(oversampled_size[0],
+                                         nullptr,
+                                         nullptr,
+                                         FFTW_BACKWARD, FFTW_ESTIMATE);
     }
 
 }
