@@ -6,6 +6,8 @@
 #include <utility>
 #include <vector>
 
+#include <fftw3.h>
+
 #ifdef USFFTPP_EXPORT
 #    ifdef _WIN32
 #        define USFFTPP_API __declspec(dllexport)
@@ -22,14 +24,21 @@ namespace usfftpp {
 
 enum class fourier_direction { forward, backward };
 
-template <typename T, std::size_t D, typename FoldPolicy> class USFFTPP_API plan {
-  public:
+template <typename T, std::size_t D, typename FoldPolicy>
+class USFFTPP_API plan {
+public:
     int nonunform_to_uniform_transform(std::complex<T> *F, std::complex<T> *f, int FourierType);
     int uninform_to_nonuniform_transform(std::complex<T> *F, std::complex<T> *f, int FourierType);
 };
 
-template <typename T, typename FoldPolicy> class USFFTPP_API plan<T, 1, FoldPolicy> {
-  protected:
+template <typename T, typename FoldPolicy>
+class USFFTPP_API plan<T, 1, FoldPolicy> {
+protected:
+    using fftw_plan_type = std::conditional_t<std::is_same<T, float>::value, fftwf_plan, fftw_plan>;
+
+    fftw_plan_type m_plan_fwd;
+    fftw_plan_type m_plan_bwd;
+
     std::array<std::ptrdiff_t, 1> m_N;
     T m_epsilon;
     T m_lambda;
@@ -59,17 +68,21 @@ template <typename T, typename FoldPolicy> class USFFTPP_API plan<T, 1, FoldPoli
     void fft(std::complex<T> *data, fourier_direction direction);
     void deconvolute(std::complex<T> *data);
 
-  public:
+public:
     plan(std::array<std::ptrdiff_t, 1> N, std::vector<T> &points, T epsilon);
 
-    int nonunform_to_uniform_transform(std::complex<T> *in, std::complex<T> *out,
-                                       fourier_direction direction);
-    int uninform_to_nonuniform_transform(std::complex<T> *in, std::complex<T> *out,
-                                         fourier_direction direction);
+    int nonunform_to_uniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
+    int uninform_to_nonuniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
 };
 
-template <typename T, typename FoldPolicy> class USFFTPP_API plan<T, 2, FoldPolicy> {
-  protected:
+template <typename T, typename FoldPolicy>
+class USFFTPP_API plan<T, 2, FoldPolicy> {
+protected:
+    using fftw_plan_type = std::conditional_t<std::is_same<T, float>::value, fftwf_plan, fftw_plan>;
+
+    fftw_plan_type m_plan_fwd;
+    fftw_plan_type m_plan_bwd;
+
     std::array<std::ptrdiff_t, 2> m_N;
     T m_epsilon;
     T m_lambda;
@@ -100,12 +113,10 @@ template <typename T, typename FoldPolicy> class USFFTPP_API plan<T, 2, FoldPoli
     void fft(std::complex<T> *data, fourier_direction direction);
     void deconvolute(std::complex<T> *data);
 
-  public:
+public:
     plan(std::array<std::ptrdiff_t, 2> N, std::vector<std::tuple<T, T>> &points, T epsilon);
 
-    int nonunform_to_uniform_transform(std::complex<T> *in, std::complex<T> *out,
-                                       fourier_direction direction);
-    int uninform_to_nonuniform_transform(std::complex<T> *in, std::complex<T> *out,
-                                         fourier_direction direction);
+    int nonunform_to_uniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
+    int uninform_to_nonuniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
 };
-} // namespace usfftpp
+}    // namespace usfftpp

@@ -101,29 +101,34 @@ template <typename T> void fftshift(std::complex<T> *data, std::size_t N) {
 template <typename T, typename FoldPolicy>
 void plan<T, 1, FoldPolicy>::fft(std::complex<T> *data, fourier_direction direction) {
 
-    const int padded_size[] = {static_cast<int>(m_oversamplingFactor * m_N[0])};
-
-    int sign;
-    if (direction == fourier_direction::forward) {
-        sign = FFTW_FORWARD;
-    } else {
-        sign = FFTW_BACKWARD;
-    }
-
     fftshift(data + m_radius, m_oversamplingFactor * m_N[0]);
 
     if constexpr (std::is_same<T, float>::value) {
-        fftwf_plan p = fftwf_plan_dft_1d(padded_size[0], (fftwf_complex *)&data[m_radius],
-                                         (fftwf_complex *)&data[m_radius], sign, FFTW_ESTIMATE);
-
-        fftwf_execute(p);
-        fftwf_destroy_plan(p);
+        auto pointer_to_data = reinterpret_cast<fftwf_complex *>(&data[m_radius]);
+        switch (direction)
+        {
+        case fourier_direction::forward:
+            fftwf_execute_dft(m_plan_fwd, pointer_to_data, pointer_to_data);
+            break;
+        case fourier_direction::backward:
+            fftwf_execute_dft(m_plan_bwd, pointer_to_data, pointer_to_data);
+            break;
+        default:
+            break;
+        }
     } else {
-        fftw_plan p = fftw_plan_dft_1d(padded_size[0], (fftw_complex *)&data[m_radius],
-                                       (fftw_complex *)&data[m_radius], sign, FFTW_ESTIMATE);
-
-        fftw_execute(p);
-        fftw_destroy_plan(p);
+        auto pointer_to_data = reinterpret_cast<fftw_complex *>(&data[m_radius]);
+        switch (direction)
+        {
+        case fourier_direction::forward:
+            fftw_execute_dft(m_plan_fwd, pointer_to_data, pointer_to_data);
+            break;
+        case fourier_direction::backward:
+            fftw_execute_dft(m_plan_bwd, pointer_to_data, pointer_to_data);
+            break;
+        default:
+            break;
+        }    
     }
 
     fftshift(data + m_radius, m_oversamplingFactor * m_N[0]);
@@ -215,6 +220,25 @@ plan<T, 1, FoldPolicy>::plan(std::array<std::ptrdiff_t, 1> N, std::vector<T> &po
       m_firstOccurrenceArray(std::make_unique<std::ptrdiff_t[]>(2 * m_N[0] + 1)),
       m_strides({static_cast<std::size_t>(m_radius), 1}) {
     reorder_points();
+
+    const int oversampled_size[] = {static_cast<int>(m_oversamplingFactor * m_N[0])};
+    if constexpr (std::is_same<T, float>::value) {
+        m_plan_fwd = fftwf_plan_dft_1d(oversampled_size[0], 0,
+                                         0, FFTW_FORWARD, FFTW_ESTIMATE);
+        m_plan_bwd = fftwf_plan_dft_1d(oversampled_size[0], 0,
+                                         0, FFTW_BACKWARD, FFTW_ESTIMATE);
+
+    } else {
+        m_plan_fwd = fftw_plan_dft_1d(oversampled_size[0], 
+                                         nullptr,
+                                         nullptr,
+                                         FFTW_FORWARD, FFTW_ESTIMATE);
+        m_plan_bwd = fftw_plan_dft_1d(oversampled_size[0],
+                                         nullptr,
+                                         nullptr,
+                                         FFTW_BACKWARD, FFTW_ESTIMATE);
+    }
+
 }
 
 } // namespace usfftpp
