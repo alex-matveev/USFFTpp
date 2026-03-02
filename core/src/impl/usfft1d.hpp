@@ -7,15 +7,13 @@
 #include <cstring>
 #include <memory>
 #include <new>
+#include <numbers>
 #include <utility>
 #include <vector>
 
 #include <fftw3.h>
 
 #include "USFFTpp/usfftpp.h"
-
-#define _USE_MATH_DEFINES
-#include <math.h>
 
 namespace usfftpp {
 
@@ -64,8 +62,8 @@ void plan<T, 1, FoldPolicy>::fill_first_occurrence_array() {
 
 template <typename T, typename FoldPolicy>
 void plan<T, 1, FoldPolicy>::deconvolute(std::complex<T> *data) {
-    T a = sqrt(m_lambda) / sqrt(M_PI);
-    T b = M_PI * M_PI / (m_N[0] * m_N[0]) / (m_lambda * 4);
+    T a = sqrt(m_lambda) / sqrt(std::numbers::pi_v<T>);
+    T b = std::numbers::pi_v<T> * std::numbers::pi_v<T> / (m_N[0] * m_N[0]) / (m_lambda * 4);
 
 #pragma omp parallel for
     for (std::ptrdiff_t i = 0; i < m_N[0]; i++) {
@@ -215,7 +213,7 @@ int plan<T, 1, FoldPolicy>::uninform_to_nonuniform_transform(std::complex<T> *in
 template <typename T, typename FoldPolicy>
 plan<T, 1, FoldPolicy>::plan(std::array<std::ptrdiff_t, 1> N, std::vector<T> &points, T epsilon)
     : m_points(points), m_N(N), m_epsilon(epsilon),
-      m_lambda((M_PI * M_PI) / (-(2) * log(m_epsilon))),
+      m_lambda((std::numbers::pi_v<T> * std::numbers::pi_v<T>) / (-(2) * log(m_epsilon))),
       m_radius((std::ptrdiff_t)(sqrt(-log(epsilon) / m_lambda))),
       m_firstOccurrenceArray(std::make_unique<std::ptrdiff_t[]>(2 * m_N[0] + 1)),
       m_strides({static_cast<std::size_t>(m_radius), 1}) {

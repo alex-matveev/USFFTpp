@@ -1,3 +1,4 @@
+#include <numbers>
 #include <random>
 #include <tuple>
 
@@ -22,7 +23,7 @@ void usdft2d_u2e(
     for (int i = 0; i < N[0]; i++) {
         for (int j = 0; j < N[1]; j++) {
             for (int k = 0; k < M; k++) {
-                T ang = 2 * M_PI
+                T ang = 2 * std::numbers::pi_v<T>
                         * ((i - (int)N[0] / 2) * std::get<0>(points[k])
                            + (j - (int)N[1] / 2) * std::get<1>(points[k]))
                         * FourierType;
@@ -45,7 +46,7 @@ void usdft2d_e2u(
     for (int k = 0; k < M; k++) {
         for (int i = 0; i < N[0]; i++) {
             for (int j = 0; j < N[1]; j++) {
-                T ang = 2 * M_PI
+                T ang = 2 * std::numbers::pi_v<T>
                         * ((j - (int)N[1] / 2) * std::get<1>(points[k])
                            + (i - (int)N[0] / 2) * std::get<0>(points[k]))
                         * FourierType;

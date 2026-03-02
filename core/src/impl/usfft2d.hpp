@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <memory>
 #include <new>
+#include <numbers>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -12,9 +13,6 @@
 #include <fftw3.h>
 
 #include "USFFTpp/usfftpp.h"
-
-#define _USE_MATH_DEFINES
-#include <math.h>
 
 namespace usfftpp {
 
@@ -71,8 +69,8 @@ void plan<T, 2, FoldPolicy>::deconvolute(std::complex<T> *data) {
 #pragma omp parallel for
     for (std::ptrdiff_t i = 0; i < m_N[0]; i++) {
         for (std::ptrdiff_t j = 0; j < m_N[1]; j++) {
-            T coef = m_lambda / M_PI *
-                     exp(M_PI * M_PI *
+            T coef = m_lambda / std::numbers::pi_v<T> *
+                     exp(std::numbers::pi_v<T> * std::numbers::pi_v<T> *
                          ((j - m_N[1] / 2) * (j - m_N[1] / 2) / (T)(m_N[1] * m_N[1]) +
                           (i - m_N[0] / 2) * (i - m_N[0] / 2) / (T)(m_N[0] * m_N[0])) /
                          (m_lambda * 4));
@@ -333,7 +331,7 @@ template <typename T, typename FoldPolicy>
 plan<T, 2, FoldPolicy>::plan(std::array<std::ptrdiff_t, 2> N, std::vector<std::tuple<T, T>> &points,
                              T epsilon)
     : m_points(points), m_N(N), m_epsilon(epsilon),
-      m_lambda((M_PI * M_PI) / (-(2) * (log(epsilon)))),
+      m_lambda((std::numbers::pi_v<T> * std::numbers::pi_v<T>) / (-(2) * (log(epsilon)))),
       m_radius((std::size_t)(sqrt(-log(epsilon) / m_lambda))),
       m_di(std::make_unique<std::pair<std::size_t, std::size_t>[]>(points.size())),
       m_firstOccurrenceArray(std::make_unique<std::ptrdiff_t[]>(

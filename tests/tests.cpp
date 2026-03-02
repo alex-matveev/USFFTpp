@@ -1,3 +1,4 @@
+#include <numbers>
 #include <random>
 #include <tuple>
 
@@ -21,7 +22,7 @@ void usdft1d_e2u(
 #pragma omp parallel for
     for (std::ptrdiff_t i = 0; i < M; i++) {
         for (std::ptrdiff_t j = 0; j < N[0]; j++) {
-            T ang = 2 * M_PI * (j - (std::ptrdiff_t)N[0] / 2) * w[i] * FourierType;
+            T ang = 2 * std::numbers::pi_v<T> * (j - (std::ptrdiff_t)N[0] / 2) * w[i] * FourierType;
             a[i] += f[j] * std::polar<T>(1, ang);
         }
     }
@@ -39,7 +40,7 @@ void usdft1d_u2e(
 #pragma omp parallel for
     for (std::ptrdiff_t i = 0; i < N[0]; i++) {
         for (std::ptrdiff_t j = 0; j < M; j++) {
-            T ang = 2 * M_PI * (i - (std::ptrdiff_t)N[0] / 2) * w[j] * FourierType;
+            T ang = 2 * std::numbers::pi_v<T> * (i - (std::ptrdiff_t)N[0] / 2) * w[j] * FourierType;
             a[i] += f[j] * std::polar<T>(1, ang);
         }
     }
