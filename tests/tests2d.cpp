@@ -3,9 +3,9 @@
 
 #include <gtest/gtest.h>
 
-#include "convPolicies.h"
-#include "usfft-seq.h"
-#include "usfftpp.h"
+#include "USFFTpp/convPolicies.h"
+#include "USFFTpp/usfft-seq.h"
+#include "USFFTpp/usfftpp.h"
 
 using namespace usfftpp;
 

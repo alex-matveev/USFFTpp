@@ -1,6 +1,6 @@
-#include "usfftpp.h"
-
 #pragma once
+
+#include "usfftpp.h"
 
 namespace usfftpp {
 template <typename T, std::size_t D, typename GatherVisitorPolicy, typename ScatterVisitorPolicy>

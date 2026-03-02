@@ -1,7 +1,7 @@
-#include "usfftpp.h"
+#include "USFFTpp/usfftpp.h"
 
-#include "convPolicies.h"
-#include "usfft-seq.h"
+#include "USFFTpp/convPolicies.h"
+#include "USFFTpp/usfft-seq.h"
 
 #include "impl/seq.hpp"
 #include "impl/usfft1d.hpp"

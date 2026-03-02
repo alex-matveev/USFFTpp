@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
@@ -9,12 +11,10 @@
 
 #include <fftw3.h>
 
-#include "usfftpp.h"
+#include "USFFTpp/usfftpp.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
-
-#pragma once
 
 namespace usfftpp {
 

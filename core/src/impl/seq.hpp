@@ -1,7 +1,8 @@
+#pragma once
+
 #include <iostream>
 
-#include "usfft-seq.h"
-#pragma once
+#include "USFFTpp/usfft-seq.h"
 
 namespace usfftpp {
 
