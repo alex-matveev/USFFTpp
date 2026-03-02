@@ -114,7 +114,7 @@ void seq<T, 1, GatherVisitorPolicy, ScatterVisitorPolicy>::scatter(std::complex<
     this->fill_first_occurrence_array();
     auto tmp_in = std::make_unique<std::complex<T>[]>(this->m_points.size());
 #pragma omp parallel for
-    for (ptrdiff_t i = 0; i < this->m_points.size(); i++) {
+    for (ptrdiff_t i = 0; i < static_cast<ptrdiff_t>(this->m_points.size()); i++) {
         tmp_in[i] = in[this->m_di[i].second];
     }
 
@@ -153,7 +153,7 @@ void seq<T, 2, GatherVisitorPolicy, ScatterVisitorPolicy>::scatter(std::complex<
     auto tmp_in = std::make_unique<std::complex<T>[]>(this->m_points.size());
 
 #pragma omp parallel for
-    for (ptrdiff_t i = 0; i < this->m_points.size(); i++) {
+    for (ptrdiff_t i = 0; i < static_cast<ptrdiff_t>(this->m_points.size()); i++) {
         tmp_in[i] = in[this->m_di[i].second];
     }
 

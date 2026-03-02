@@ -23,7 +23,7 @@ template <typename T, typename FoldPolicy> void plan<T, 1, FoldPolicy>::reorder_
     m_di = std::make_unique<std::pair<std::size_t, std::size_t>[]>(m_points.size());
 
 #pragma omp parallel for
-    for (std::ptrdiff_t i = 0; i < m_points.size(); i++) {
+    for (std::ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(m_points.size()); i++) {
         m_di[i].first = static_cast<std::ptrdiff_t>((m_oversamplingFactor * m_N[0] * m_points[i]) +
                                                     m_oversamplingFactor * m_N[0] / 2);
         m_di[i].second = i;
@@ -33,7 +33,7 @@ template <typename T, typename FoldPolicy> void plan<T, 1, FoldPolicy>::reorder_
     std::vector<T> tmp_points;
 
     tmp_points.reserve(m_points.size());
-    for (ptrdiff_t i = 0; i < m_points.size(); i++) {
+    for (ptrdiff_t i = 0; i < static_cast<std::ptrdiff_t>(m_points.size()); i++) {
         tmp_points.push_back(m_points[m_di[i].second]);
     }
 
@@ -45,17 +45,17 @@ void plan<T, 1, FoldPolicy>::fill_first_occurrence_array() {
     std::ptrdiff_t msize = (m_oversamplingFactor * m_N[0]);
     std::ptrdiff_t pos = 0;
 
-    while (pos < m_points.size()) {
+    while (pos < static_cast<std::ptrdiff_t>(m_points.size())) {
         std::ptrdiff_t ind = m_di[pos].first;
         m_firstOccurrenceArray[ind] = pos;
-        while (pos < m_points.size() && ind == m_di[pos].first) {
+        while (pos < static_cast<std::ptrdiff_t>(m_points.size()) && ind == m_di[pos].first) {
             pos++;
         }
     }
 
     m_firstOccurrenceArray[msize] = m_points.size();
 
-    for (std::ptrdiff_t i = msize - 1; i >= m_di[0].first + 1; i--) {
+    for (std::ptrdiff_t i = msize - 1; i >= static_cast<std::ptrdiff_t>(m_di[0].first) + 1; i--) {
         if (m_firstOccurrenceArray[i] == 0) {
             m_firstOccurrenceArray[i] = m_firstOccurrenceArray[i + 1];
         }

@@ -23,11 +23,11 @@ template <typename T, typename FoldPolicy> void plan<T, 2, FoldPolicy>::reorder_
     m_di = std::make_unique<std::pair<std::size_t, std::size_t>[]>(m_points.size());
 
 #pragma omp parallel for
-    for (std::ptrdiff_t i = 0; i < m_points.size(); i++) {
-        std::size_t indx = (m_oversamplingFactor * m_N[1] * std::get<1>(m_points[i])) +
-                           m_oversamplingFactor * m_N[1] / 2;
-        std::size_t indy = (m_oversamplingFactor * m_N[0] * std::get<0>(m_points[i])) +
-                           m_oversamplingFactor * m_N[0] / 2;
+    for (std::ptrdiff_t i = 0; i < static_cast<ptrdiff_t>(m_points.size()); i++) {
+        std::size_t indx = static_cast<size_t>((m_oversamplingFactor * m_N[1] * std::get<1>(m_points[i])) +
+                           m_oversamplingFactor * m_N[1] / 2);
+        std::size_t indy = static_cast<size_t>((m_oversamplingFactor * m_N[0] * std::get<0>(m_points[i])) +
+                           m_oversamplingFactor * m_N[0] / 2);
         m_di[i].first = indx + m_oversamplingFactor * m_N[1] * indy;
         m_di[i].second = i;
     }
@@ -36,7 +36,7 @@ template <typename T, typename FoldPolicy> void plan<T, 2, FoldPolicy>::reorder_
     std::vector<std::tuple<T, T>> tmp_points;
 
     tmp_points.reserve(m_points.size());
-    for (ptrdiff_t i = 0; i < m_points.size(); i++) {
+    for (ptrdiff_t i = 0; i < static_cast<ptrdiff_t>(m_points.size()); i++) {
         tmp_points.push_back(m_points[m_di[i].second]);
     }
 
@@ -46,17 +46,17 @@ template <typename T, typename FoldPolicy> void plan<T, 2, FoldPolicy>::reorder_
 template <typename T, typename FoldPolicy>
 void plan<T, 2, FoldPolicy>::fill_first_occurrence_array() {
     std::ptrdiff_t pos = 0;
-    while (pos < m_points.size()) {
+    while (pos < static_cast<ptrdiff_t>(m_points.size())) {
         std::ptrdiff_t ind = m_di[pos].first;
         m_firstOccurrenceArray[ind] = pos;
-        while (pos < m_points.size() && ind == m_di[pos].first) {
+        while (pos < static_cast<ptrdiff_t>(m_points.size()) && ind == m_di[pos].first) {
             pos++;
         }
     }
     m_firstOccurrenceArray[(m_oversamplingFactor * m_N[0]) * (m_oversamplingFactor * m_N[1])] =
         m_points.size();
     for (std::ptrdiff_t i = (m_oversamplingFactor * m_N[0]) * (m_oversamplingFactor * m_N[1]) - 1;
-         i >= m_di[0].first + 1; i--) {
+         i >= static_cast<ptrdiff_t>(m_di[0].first + 1); i--) {
         if (m_firstOccurrenceArray[i] == 0) {
             m_firstOccurrenceArray[i] = m_firstOccurrenceArray[i + 1];
         }
@@ -175,7 +175,7 @@ template <typename T, typename FoldPolicy>
 void plan<T, 2, FoldPolicy>::fill_borders(std::complex<T> *data) {
 
 #pragma omp parallel for
-    for (std::ptrdiff_t i = 0; i < m_oversamplingFactor * m_N[0]; i++) {
+    for (std::ptrdiff_t i = 0; i < static_cast<ptrdiff_t>(m_oversamplingFactor * m_N[0]); i++) {
         for (std::ptrdiff_t j = -m_radius; j < 0; j++) {
             std::ptrdiff_t ind1 = m_strides[0] + m_strides[1] * i + m_strides[2] * j;
             std::ptrdiff_t ind2 =
@@ -187,7 +187,7 @@ void plan<T, 2, FoldPolicy>::fill_borders(std::complex<T> *data) {
             data[ind1] = data[ind2];
         }
         for (std::ptrdiff_t j = m_oversamplingFactor * m_N[1];
-             j < m_oversamplingFactor * m_N[1] + m_radius; j++) {
+             j < static_cast<ptrdiff_t>(m_oversamplingFactor * m_N[1] + m_radius); j++) {
             std::ptrdiff_t ind1 = m_strides[0] + m_strides[1] * i + m_strides[2] * j;
             std::ptrdiff_t ind2 =
                 m_strides[0] +
@@ -216,7 +216,7 @@ void plan<T, 2, FoldPolicy>::fill_borders(std::complex<T> *data) {
 
 #pragma omp parallel for
     for (std::ptrdiff_t i = m_oversamplingFactor * m_N[0];
-         i < m_oversamplingFactor * m_N[0] + m_radius; i++) {
+         i < static_cast<ptrdiff_t>(m_oversamplingFactor * m_N[0] + m_radius); i++) {
         for (std::ptrdiff_t j = -m_radius;
              j < (std::ptrdiff_t)(m_oversamplingFactor * m_N[1]) + m_radius; j++) {
             std::ptrdiff_t ind1 = m_strides[0] + m_strides[1] * i + m_strides[2] * j;
@@ -251,7 +251,7 @@ void plan<T, 2, FoldPolicy>::wrap_borders(std::complex<T> *data) {
 
 #pragma omp parallel for
     for (std::ptrdiff_t i = m_oversamplingFactor * m_N[0];
-         i < m_oversamplingFactor * m_N[0] + m_radius; i++) {
+         i < static_cast<ptrdiff_t>(m_oversamplingFactor * m_N[0] + m_radius); i++) {
         for (std::ptrdiff_t j = -m_radius;
              j < (std::ptrdiff_t)(m_oversamplingFactor * m_N[1]) + m_radius; j++) {
             std::ptrdiff_t ind1 = m_strides[0] + m_strides[1] * i + m_strides[2] * j;
@@ -266,7 +266,7 @@ void plan<T, 2, FoldPolicy>::wrap_borders(std::complex<T> *data) {
     }
 
 #pragma omp parallel for
-    for (std::ptrdiff_t i = 0; i < m_oversamplingFactor * m_N[0]; i++) {
+    for (std::ptrdiff_t i = 0; i < static_cast<ptrdiff_t>(m_oversamplingFactor * m_N[0]); i++) {
         for (std::ptrdiff_t j = -m_radius; j < 0; j++) {
             std::ptrdiff_t ind1 = m_strides[0] + m_strides[1] * i + m_strides[2] * j;
             std::ptrdiff_t ind2 =
@@ -278,7 +278,7 @@ void plan<T, 2, FoldPolicy>::wrap_borders(std::complex<T> *data) {
             data[ind2] += data[ind1];
         }
         for (std::ptrdiff_t j = m_oversamplingFactor * m_N[1];
-             j < m_oversamplingFactor * m_N[1] + m_radius; j++) {
+             j < static_cast<ptrdiff_t>(m_oversamplingFactor * m_N[1] + m_radius); j++) {
             std::ptrdiff_t ind1 = m_strides[0] + m_strides[1] * i + m_strides[2] * j;
             std::ptrdiff_t ind2 =
                 m_strides[0] +
