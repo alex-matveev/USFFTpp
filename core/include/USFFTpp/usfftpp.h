@@ -20,21 +20,19 @@
 #    define USFFTPP_API
 #endif
 
-#pragma once
-
 namespace usfftpp {
 
 enum class fourier_direction { forward, backward };
 
 template <typename T, std::size_t D, typename FoldPolicy>
-class USFFTPP_API plan {
+class plan {
 public:
-    int nonunform_to_uniform_transform(std::complex<T> *F, std::complex<T> *f, int FourierType);
-    int uninform_to_nonuniform_transform(std::complex<T> *F, std::complex<T> *f, int FourierType);
+    USFFTPP_API int nonunform_to_uniform_transform(std::complex<T> *F, std::complex<T> *f, int FourierType);
+    USFFTPP_API int uninform_to_nonuniform_transform(std::complex<T> *F, std::complex<T> *f, int FourierType);
 };
 
 template <typename T, typename FoldPolicy>
-class USFFTPP_API plan<T, 1, FoldPolicy> {
+class plan<T, 1, FoldPolicy> {
 protected:
     using fftw_plan_type = std::conditional_t<std::is_same<T, float>::value, fftwf_plan, fftw_plan>;
 
@@ -71,14 +69,14 @@ protected:
     void deconvolute(std::complex<T> *data);
 
 public:
-    plan(std::array<std::ptrdiff_t, 1> N, std::vector<T> &points, T epsilon);
+    USFFTPP_API plan(std::array<std::ptrdiff_t, 1> N, std::vector<T> &points, T epsilon);
 
-    int nonunform_to_uniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
-    int uninform_to_nonuniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
+    USFFTPP_API int nonunform_to_uniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
+    USFFTPP_API int uninform_to_nonuniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
 };
 
 template <typename T, typename FoldPolicy>
-class USFFTPP_API plan<T, 2, FoldPolicy> {
+class plan<T, 2, FoldPolicy> {
 protected:
     using fftw_plan_type = std::conditional_t<std::is_same<T, float>::value, fftwf_plan, fftw_plan>;
 
@@ -116,9 +114,10 @@ protected:
     void deconvolute(std::complex<T> *data);
 
 public:
-    plan(std::array<std::ptrdiff_t, 2> N, std::vector<std::tuple<T, T>> &points, T epsilon);
+    USFFTPP_API plan(std::array<std::ptrdiff_t, 2> N, std::vector<std::tuple<T, T>> &points, T epsilon);
 
-    int nonunform_to_uniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
-    int uninform_to_nonuniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
+    USFFTPP_API int nonunform_to_uniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
+    USFFTPP_API int uninform_to_nonuniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
 };
+
 }    // namespace usfftpp
