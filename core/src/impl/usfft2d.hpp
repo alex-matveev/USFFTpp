@@ -341,7 +341,7 @@ plan<T, 2, FoldPolicy>::plan(std::array<std::ptrdiff_t, 2> N, std::vector<std::t
     reorder_points();
 
     const std::array<int, 2> oversampled_size = {static_cast<int>(m_oversamplingFactor * m_N[0]),
-                                          static_cast<int>(m_oversamplingFactor * m_N[1])};
+                                                 static_cast<int>(m_oversamplingFactor * m_N[1])};
     const std::array<int, 2> inembed = {
         static_cast<int>(m_oversamplingFactor * (m_N[0] + m_radius)),
         static_cast<int>(m_oversamplingFactor * (m_N[1] + m_radius))};
@@ -349,30 +349,53 @@ plan<T, 2, FoldPolicy>::plan(std::array<std::ptrdiff_t, 2> N, std::vector<std::t
         static_cast<int>(m_oversamplingFactor * (m_N[0] + m_radius)),
         static_cast<int>(m_oversamplingFactor * (m_N[1] + m_radius))};
 
-    if constexpr (std::is_same<T, float>::value) {
-        m_plan_fwd = fftwf_plan_many_dft(
-            2, oversampled_size.data(), 1,
-            nullptr, inembed.data(), 1, 0, 
-            nullptr, onembed.data(), 1, 0, 
-            FFTW_FORWARD, FFTW_ESTIMATE);
-        m_plan_bwd = fftwf_plan_many_dft(
-            2, oversampled_size.data(), 1,
-            nullptr, inembed.data(), 1, 0, 
-            nullptr, onembed.data(), 1, 0, 
-            FFTW_BACKWARD, FFTW_ESTIMATE);
-    } else {
-        m_plan_fwd = fftw_plan_many_dft(
-            2, oversampled_size.data(), 1,
-            nullptr, inembed.data(), 1, 0, 
-            nullptr, onembed.data(), 1, 0, 
-            FFTW_FORWARD, FFTW_ESTIMATE);
-        m_plan_bwd = fftw_plan_many_dft(
-            2, oversampled_size.data(), 1,
-            nullptr, inembed.data(), 1, 0, 
-            nullptr, onembed.data(), 1, 0, 
-            FFTW_BACKWARD, FFTW_ESTIMATE);
+    {
+        std::lock_guard<std::mutex> lock(fftw_planner_mutex());
+        if constexpr (std::is_same<T, float>::value) {
+            m_plan_fwd = fftwf_plan_many_dft(
+                2, oversampled_size.data(), 1,
+                nullptr, inembed.data(), 1, 0,
+                nullptr, onembed.data(), 1, 0,
+                FFTW_FORWARD, FFTW_ESTIMATE);
+            m_plan_bwd = fftwf_plan_many_dft(
+                2, oversampled_size.data(), 1,
+                nullptr, inembed.data(), 1, 0,
+                nullptr, onembed.data(), 1, 0,
+                FFTW_BACKWARD, FFTW_ESTIMATE);
+        } else {
+            m_plan_fwd = fftw_plan_many_dft(
+                2, oversampled_size.data(), 1,
+                nullptr, inembed.data(), 1, 0,
+                nullptr, onembed.data(), 1, 0,
+                FFTW_FORWARD, FFTW_ESTIMATE);
+            m_plan_bwd = fftw_plan_many_dft(
+                2, oversampled_size.data(), 1,
+                nullptr, inembed.data(), 1, 0,
+                nullptr, onembed.data(), 1, 0,
+                FFTW_BACKWARD, FFTW_ESTIMATE);
+        }
     }
 
+}
+
+template <typename T, typename FoldPolicy>
+plan<T, 2, FoldPolicy>::~plan() {
+    std::lock_guard<std::mutex> lock(fftw_planner_mutex());
+    if constexpr (std::is_same<T, float>::value) {
+        if (m_plan_fwd) {
+            fftwf_destroy_plan(m_plan_fwd);
+        }
+        if (m_plan_bwd) {
+            fftwf_destroy_plan(m_plan_bwd);
+        }
+    } else {
+        if (m_plan_fwd) {
+            fftw_destroy_plan(m_plan_fwd);
+        }
+        if (m_plan_bwd) {
+            fftw_destroy_plan(m_plan_bwd);
+        }
+    }
 }
 
 } // namespace usfftpp

@@ -4,6 +4,7 @@
 #include <complex>
 #include <cstddef>
 #include <memory>
+#include <mutex>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -21,6 +22,11 @@
 #endif
 
 namespace usfftpp {
+
+inline std::mutex &fftw_planner_mutex() {
+    static std::mutex m;
+    return m;
+}
 
 enum class fourier_direction { forward, backward };
 
@@ -71,6 +77,8 @@ protected:
 public:
     USFFTPP_API plan(std::array<std::ptrdiff_t, 1> N, std::vector<T> &points, T epsilon);
 
+    USFFTPP_API ~plan();
+
     USFFTPP_API int nonunform_to_uniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
     USFFTPP_API int uninform_to_nonuniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
 };
@@ -115,6 +123,8 @@ protected:
 
 public:
     USFFTPP_API plan(std::array<std::ptrdiff_t, 2> N, std::vector<std::tuple<T, T>> &points, T epsilon);
+
+    USFFTPP_API ~plan();
 
     USFFTPP_API int nonunform_to_uniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
     USFFTPP_API int uninform_to_nonuniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);

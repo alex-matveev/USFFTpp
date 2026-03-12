@@ -220,23 +220,54 @@ plan<T, 1, FoldPolicy>::plan(std::array<std::ptrdiff_t, 1> N, std::vector<T> &po
     reorder_points();
 
     const int oversampled_size[] = {static_cast<int>(m_oversamplingFactor * m_N[0])};
-    if constexpr (std::is_same<T, float>::value) {
-        m_plan_fwd = fftwf_plan_dft_1d(oversampled_size[0], 0,
-                                         0, FFTW_FORWARD, FFTW_ESTIMATE);
-        m_plan_bwd = fftwf_plan_dft_1d(oversampled_size[0], 0,
-                                         0, FFTW_BACKWARD, FFTW_ESTIMATE);
+    {
+        std::lock_guard<std::mutex> lock(fftw_planner_mutex());
+        if constexpr (std::is_same<T, float>::value) {
+            m_plan_fwd = fftwf_plan_dft_1d(oversampled_size[0],
+                                           nullptr,
+                                           nullptr,
+                                           FFTW_FORWARD,
+                                           FFTW_ESTIMATE);
+            m_plan_bwd = fftwf_plan_dft_1d(oversampled_size[0],
+                                           nullptr,
+                                           nullptr,
+                                           FFTW_BACKWARD,
+                                           FFTW_ESTIMATE);
 
-    } else {
-        m_plan_fwd = fftw_plan_dft_1d(oversampled_size[0], 
-                                         nullptr,
-                                         nullptr,
-                                         FFTW_FORWARD, FFTW_ESTIMATE);
-        m_plan_bwd = fftw_plan_dft_1d(oversampled_size[0],
-                                         nullptr,
-                                         nullptr,
-                                         FFTW_BACKWARD, FFTW_ESTIMATE);
+        } else {
+            m_plan_fwd = fftw_plan_dft_1d(oversampled_size[0],
+                                          nullptr,
+                                          nullptr,
+                                          FFTW_FORWARD,
+                                          FFTW_ESTIMATE);
+            m_plan_bwd = fftw_plan_dft_1d(oversampled_size[0],
+                                          nullptr,
+                                          nullptr,
+                                          FFTW_BACKWARD,
+                                          FFTW_ESTIMATE);
+        }
     }
 
+}
+
+template <typename T, typename FoldPolicy>
+plan<T, 1, FoldPolicy>::~plan() {
+    std::lock_guard<std::mutex> lock(fftw_planner_mutex());
+    if constexpr (std::is_same<T, float>::value) {
+        if (m_plan_fwd) {
+            fftwf_destroy_plan(m_plan_fwd);
+        }
+        if (m_plan_bwd) {
+            fftwf_destroy_plan(m_plan_bwd);
+        }
+    } else {
+        if (m_plan_fwd) {
+            fftw_destroy_plan(m_plan_fwd);
+        }
+        if (m_plan_bwd) {
+            fftw_destroy_plan(m_plan_bwd);
+        }
+    }
 }
 
 } // namespace usfftpp
