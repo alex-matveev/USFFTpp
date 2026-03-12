@@ -7,15 +7,17 @@
 
 namespace usfftpp {
 
-template <std::size_t D> class simple_par_visitor_policy {
-  public:
+template <std::size_t D>
+class simple_par_visitor_policy {
+public:
     template <typename T, typename Functor>
     static void run(Functor fun, std::vector<T> &x, std::complex<T> *f, std::complex<T> *scaled);
 };
 
-template <> class simple_par_visitor_policy<1> {
+template <>
+class simple_par_visitor_policy<1> {
 
-  public:
+public:
     template <typename T, typename Functor>
     static void run(Functor fun, std::vector<T> &x, std::complex<T> *f, std::complex<T> *scaled) {
 #pragma omp parallel
@@ -28,12 +30,17 @@ template <> class simple_par_visitor_policy<1> {
     }
 };
 
-template <> class simple_par_visitor_policy<2> {
+template <>
+class simple_par_visitor_policy<2> {
 
-  public:
+public:
     template <typename T, typename Functor>
-    static void run(Functor fun, std::vector<std::tuple<T, T>> &x, std::complex<T> *f,
-                    std::complex<T> *scaled, std::size_t stateSize) {
+    static void
+    run(Functor fun,
+        std::vector<std::tuple<T, T>> &x,
+        std::complex<T> *f,
+        std::complex<T> *scaled,
+        std::size_t stateSize) {
 #pragma omp parallel
         {
             auto local_weight_x = std::unique_ptr<T[]>(new T[stateSize]);
@@ -47,21 +54,27 @@ template <> class simple_par_visitor_policy<2> {
     }
 };
 
-template <std::size_t D> class simple_par_block_visitor_policy {
-  public:
+template <std::size_t D>
+class simple_par_block_visitor_policy {
+public:
     template <typename T, typename Functor>
     static void run(Functor fun, std::vector<T> &x, std::complex<T> *f, std::complex<T> *scaled);
 };
 
-template <> class simple_par_block_visitor_policy<1> {
+template <>
+class simple_par_block_visitor_policy<1> {
 
     static const auto block_size = static_cast<const std::ptrdiff_t>(2 * 1024);
 
-  public:
+public:
     template <typename T, typename Functor>
-    static void run(Functor fun, std::vector<T> &x, std::complex<T> *f,
-                    std::array<std::ptrdiff_t, 1> N, const std::ptrdiff_t *FirstOccurences,
-                    std::complex<T> *scaled) {
+    static void
+    run(Functor fun,
+        std::vector<T> &x,
+        std::complex<T> *f,
+        std::array<std::ptrdiff_t, 1> N,
+        const std::ptrdiff_t *FirstOccurences,
+        std::complex<T> *scaled) {
 
 #pragma omp parallel
         {
@@ -69,13 +82,12 @@ template <> class simple_par_block_visitor_policy<1> {
 #pragma omp for schedule(dynamic, 16)
                 for (std::ptrdiff_t i = p; i <= 2 * N[0] / block_size; i += 2) {
 
-                    std::size_t count_of_points = (2 * N[0] - block_size * i > block_size)
-                                                      ? block_size
-                                                      : (2 * N[0] - block_size * i);
+                    std::size_t count_of_points =
+                        (2 * N[0] - block_size * i > block_size) ? block_size : (2 * N[0] - block_size * i);
 
                     for (std::size_t j = 0; j < count_of_points; j++) {
-                        for (std::ptrdiff_t l = 0; l < FirstOccurences[i * block_size + j + 1] -
-                                                        FirstOccurences[i * block_size + j];
+                        for (std::ptrdiff_t l = 0;
+                             l < FirstOccurences[i * block_size + j + 1] - FirstOccurences[i * block_size + j];
                              l++) {
 
                             std::size_t k = FirstOccurences[i * block_size + j] + l;
@@ -88,16 +100,23 @@ template <> class simple_par_block_visitor_policy<1> {
     }
 };
 
-template <> class simple_par_block_visitor_policy<2> {
+template <>
+class simple_par_block_visitor_policy<2> {
 
     static const std::ptrdiff_t block_size = 256;
 
-  public:
+public:
     template <typename T, typename Functor>
-    static void run(Functor fun, std::vector<std::tuple<T, T>> &x, std::complex<T> *f,
-                    std::array<std::ptrdiff_t, 2> N, const std::ptrdiff_t *firstOccurrences,
-                    std::complex<T> *scaled, std::ptrdiff_t oversamplingFactor,
-                    std::ptrdiff_t step_y, std::ptrdiff_t stateSize) {
+    static void
+    run(Functor fun,
+        std::vector<std::tuple<T, T>> &x,
+        std::complex<T> *f,
+        std::array<std::ptrdiff_t, 2> N,
+        const std::ptrdiff_t *firstOccurrences,
+        std::complex<T> *scaled,
+        std::ptrdiff_t oversamplingFactor,
+        std::ptrdiff_t step_y,
+        std::ptrdiff_t stateSize) {
 
 #pragma omp parallel
         {
@@ -110,20 +129,19 @@ template <> class simple_par_block_visitor_policy<2> {
 
 #pragma omp for schedule(dynamic, 1)
                     for (std::ptrdiff_t block_i = 0; block_i < count_of_slice_i; block_i++) {
-                        for (std::ptrdiff_t block_j = group_j;
-                             block_j <= oversamplingFactor * N[1] / block_size; block_j += 2) {
+                        for (std::ptrdiff_t block_j = group_j; block_j <= oversamplingFactor * N[1] / block_size;
+                             block_j += 2) {
 
                             std::ptrdiff_t count_of_points;
                             if (oversamplingFactor * N[1] - block_size * block_j > block_size) {
                                 count_of_points = block_size;
-                            } else {
-                                count_of_points =
-                                    (oversamplingFactor * N[1] - block_size * block_j);
+                            }
+                            else {
+                                count_of_points = (oversamplingFactor * N[1] - block_size * block_j);
                             }
                             for (std::ptrdiff_t j = 0; j < count_of_points; j++) {
-                                std::ptrdiff_t ind_foa =
-                                    (group_i + step_y * block_i) * (oversamplingFactor * N[1]) +
-                                    (block_j * block_size + j);
+                                std::ptrdiff_t ind_foa = (group_i + step_y * block_i) * (oversamplingFactor * N[1])
+                                                         + (block_j * block_size + j);
                                 for (std::ptrdiff_t l = 0;
                                      l < firstOccurrences[ind_foa + 1] - firstOccurrences[ind_foa];
                                      l++) {
@@ -139,4 +157,4 @@ template <> class simple_par_block_visitor_policy<2> {
     }
 };
 
-} // namespace usfftpp
+}    // namespace usfftpp

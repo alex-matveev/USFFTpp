@@ -46,12 +46,8 @@ void usdft1d_u2e(
     }
 }
 
-long double validate_one(
-    std::vector<long double> x,
-    std::complex<long double> *beta,
-    std::complex<long double> *new_beta,
-    int N
-) {
+long double
+validate_one(std::vector<long double> x, std::complex<long double> *beta, std::complex<long double> *new_beta, int N) {
     long double a, b;
     long double a_max = 0;
     long double b_max = 0;
@@ -76,14 +72,8 @@ protected:
 };
 
 TEST_P(USFFT1D_E2U, Calculation_ShouldReturnCorrectResult) {
-    using Plan1d = usfftpp::plan<
-        float,
-        1,
-        usfftpp::seq<
-            float,
-            1,
-            simple_par_visitor_policy<1>,
-            simple_par_block_visitor_policy<1>>>;
+    using Plan1d = usfftpp::
+        plan<float, 1, usfftpp::seq<float, 1, simple_par_visitor_policy<1>, simple_par_block_visitor_policy<1>>>;
 
     std::ptrdiff_t N                   = std::get<0>(GetParam());
     std::array<std::ptrdiff_t, 1> _N1d = { N };
@@ -140,18 +130,12 @@ TEST_P(USFFT1D_E2U, Calculation_ShouldReturnCorrectResult) {
 }
 
 TEST_P(USFFT1D_U2E, Calculation_ShouldReturnCorrectResult) {
-    using Plan1d = plan<
-        float,
-        1,
-        seq<float,
-            1,
-            simple_par_visitor_policy<1>,
-            simple_par_block_visitor_policy<1>>>;
-    std::ptrdiff_t N                   = std::get<0>(GetParam());
+    using Plan1d     = plan<float, 1, seq<float, 1, simple_par_visitor_policy<1>, simple_par_block_visitor_policy<1>>>;
+    std::ptrdiff_t N = std::get<0>(GetParam());
     std::array<std::ptrdiff_t, 1> _N1d = { N };
 
     std::ptrdiff_t points = std::get<1>(GetParam());
-    
+
     std::vector<float> vx;
     float epsilon = 1e-6;
 
@@ -168,9 +152,7 @@ TEST_P(USFFT1D_U2E, Calculation_ShouldReturnCorrectResult) {
     auto *F = new std::complex<float>[points];
 
     for (std::ptrdiff_t i = 0; i < points; i++) {
-        F[i] = std::complex<float>(
-            distribution2(generator), distribution2(generator)
-        );
+        F[i] = std::complex<float>(distribution2(generator), distribution2(generator));
     }
 
     auto *f = new std::complex<float>[_N1d[0]];
@@ -204,14 +186,8 @@ TEST_P(USFFT1D_U2E, Calculation_ShouldReturnCorrectResult) {
 }
 
 INSTANTIATE_TEST_SUITE_P(
-    usfft1d,
-    USFFT1D_E2U,
-    ::testing::Combine(
-        ::testing::Range(97, 108), ::testing::Range(97, 108)
-    )
+    usfft1d, USFFT1D_E2U, ::testing::Combine(::testing::Range(97, 108), ::testing::Range(97, 108))
 );
 INSTANTIATE_TEST_SUITE_P(
-    usfft1d,
-    USFFT1D_U2E,
-    ::testing::Combine(::testing::Range(97, 108), ::testing::Range(97, 108))
+    usfft1d, USFFT1D_U2E, ::testing::Combine(::testing::Range(97, 108), ::testing::Range(97, 108))
 );

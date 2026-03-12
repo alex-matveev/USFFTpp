@@ -79,8 +79,10 @@ public:
 
     USFFTPP_API ~plan();
 
-    USFFTPP_API int nonunform_to_uniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
-    USFFTPP_API int uninform_to_nonuniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
+    USFFTPP_API int
+    nonunform_to_uniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
+    USFFTPP_API int
+    uninform_to_nonuniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
 };
 
 template <typename T, typename FoldPolicy>
@@ -126,8 +128,10 @@ public:
 
     USFFTPP_API ~plan();
 
-    USFFTPP_API int nonunform_to_uniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
-    USFFTPP_API int uninform_to_nonuniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
+    USFFTPP_API int
+    nonunform_to_uniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
+    USFFTPP_API int
+    uninform_to_nonuniform_transform(std::complex<T> *in, std::complex<T> *out, fourier_direction direction);
 };
 
 }    // namespace usfftpp

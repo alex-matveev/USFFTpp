@@ -24,8 +24,7 @@ void usdft2d_u2e(
         for (int j = 0; j < N[1]; j++) {
             for (int k = 0; k < M; k++) {
                 T ang = 2 * std::numbers::pi_v<T>
-                        * ((i - (int)N[0] / 2) * std::get<0>(points[k])
-                           + (j - (int)N[1] / 2) * std::get<1>(points[k]))
+                        * ((i - (int)N[0] / 2) * std::get<0>(points[k]) + (j - (int)N[1] / 2) * std::get<1>(points[k]))
                         * FourierType;
                 a[i * N[1] + j] += f[k] * std::polar<T>(1, ang);
             }
@@ -47,8 +46,7 @@ void usdft2d_e2u(
         for (int i = 0; i < N[0]; i++) {
             for (int j = 0; j < N[1]; j++) {
                 T ang = 2 * std::numbers::pi_v<T>
-                        * ((j - (int)N[1] / 2) * std::get<1>(points[k])
-                           + (i - (int)N[0] / 2) * std::get<0>(points[k]))
+                        * ((j - (int)N[1] / 2) * std::get<1>(points[k]) + (i - (int)N[0] / 2) * std::get<0>(points[k]))
                         * FourierType;
                 a[k] += f[i * N[1] + j] * std::polar<T>(1, ang);
             }
@@ -56,9 +54,7 @@ void usdft2d_e2u(
     }
 }
 
-long double validate_one(
-    std::complex<long double> *beta, std::complex<long double> *new_beta, int N
-) {
+long double validate_one(std::complex<long double> *beta, std::complex<long double> *new_beta, int N) {
     long double a, b;
     long double a_max = 0;
     long double b_max = 0;
@@ -83,14 +79,8 @@ protected:
 };
 
 TEST_P(USFFT2D_E2U, Calculation_ShouldReturnCorrectResult) {
-    using Plan2d = usfftpp::plan<
-        float,
-        2,
-        usfftpp::seq<
-            float,
-            2,
-            simple_par_visitor_policy<2>,
-            simple_par_block_visitor_policy<2>>>;
+    using Plan2d = usfftpp::
+        plan<float, 2, usfftpp::seq<float, 2, simple_par_visitor_policy<2>, simple_par_block_visitor_policy<2>>>;
 
     std::ptrdiff_t N1 = std::get<0>(GetParam());
     std::ptrdiff_t N2 = std::get<1>(GetParam());
@@ -114,9 +104,7 @@ TEST_P(USFFT2D_E2U, Calculation_ShouldReturnCorrectResult) {
     auto *F = new std::complex<float>[_N2d[0] * _N2d[1]];
 
     for (ptrdiff_t i = 0; i < _N2d[0] * _N2d[1]; i++) {
-        F[i] = std::complex<float>(
-            distribution(generator), distribution(generator)
-        );
+        F[i] = std::complex<float>(distribution(generator), distribution(generator));
     }
 
     auto *f = new std::complex<float>[points];
@@ -152,14 +140,8 @@ TEST_P(USFFT2D_E2U, Calculation_ShouldReturnCorrectResult) {
 }
 
 TEST_P(USFFT2D_U2E, Calculation_ShouldReturnCorrectResult) {
-    using Plan2d = usfftpp::plan<
-        float,
-        2,
-        usfftpp::seq<
-            float,
-            2,
-            simple_par_visitor_policy<2>,
-            simple_par_block_visitor_policy<2>>>;
+    using Plan2d = usfftpp::
+        plan<float, 2, usfftpp::seq<float, 2, simple_par_visitor_policy<2>, simple_par_block_visitor_policy<2>>>;
 
     std::ptrdiff_t N1 = std::get<0>(GetParam());
     std::ptrdiff_t N2 = std::get<1>(GetParam());
@@ -183,9 +165,7 @@ TEST_P(USFFT2D_U2E, Calculation_ShouldReturnCorrectResult) {
     auto *F = new std::complex<float>[points];
 
     for (int i = 0; i < points; i++) {
-        F[i] = std::complex<float>(
-            distribution(generator), distribution(generator)
-        );
+        F[i] = std::complex<float>(distribution(generator), distribution(generator));
     }
 
     auto *f = new std::complex<float>[_N2d[0] * _N2d[1]];
@@ -221,19 +201,11 @@ TEST_P(USFFT2D_U2E, Calculation_ShouldReturnCorrectResult) {
 INSTANTIATE_TEST_SUITE_P(
     usfft2d,
     USFFT2D_E2U,
-    ::testing::Combine(
-        ::testing::Range(110, 114),
-        ::testing::Range(110, 114),
-        ::testing::Range(110, 114)
-    )
+    ::testing::Combine(::testing::Range(110, 114), ::testing::Range(110, 114), ::testing::Range(110, 114))
 );
 
 INSTANTIATE_TEST_SUITE_P(
     usfft2d,
     USFFT2D_U2E,
-    ::testing::Combine(
-        ::testing::Range(110, 114),
-        ::testing::Range(110, 114),
-        ::testing::Range(110, 114)
-    )
+    ::testing::Combine(::testing::Range(110, 114), ::testing::Range(110, 114), ::testing::Range(110, 114))
 );
