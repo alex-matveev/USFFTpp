@@ -1,0 +1,33 @@
+[build-system]
+requires = [
+  "scikit-build-core>=0.9",
+  "pybind11>=2.10",
+  "numpy",
+  "cmake>=3.15",
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "usfftpp"
+version = "0.0.1"
+description = "Python library for unequally spaced fast Fourier transform (USFFT / NUFFT), with a C++ core for fast computation and NumPy integration"
+requires-python = ">=3.8"
+authors = [
+  { name = "Alexey Matveev" },
+]
+readme = "README.md"
+license = { text = "BSD-3-Clause" }
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: C++",
+]
+
+[tool.scikit-build]
+minimum-version = "0.9"
+build-dir = "build/{wheel_tag}"
+
+[tool.scikit-build.cmake]
+minimum-version = "3.9"
+args = ["-DUSFFTPP_BUILD_PYTHON=ON"]
+
